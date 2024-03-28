@@ -21,12 +21,6 @@ describe('./musicians endpoint', () => {
         const responseData = JSON.parse(response.text);
         expect(responseData[0].name).toBe('Mick Jagger');
     } )
-    // test("returns first item in the db", async () => {
-    //     const response = await request(app).get("/musicians/1");
-    //     const otherResponse = await request(app).get("/musicians");
-    //     expect(response).toBe(otherResponse[0])
-    // })
-
     test("test new endpoint /:id", async () => {
         const response = await request(app).get("/musician/1");
         const responseData = JSON.parse(response.text);
@@ -38,4 +32,36 @@ describe('./musicians endpoint', () => {
         expect(responseData.instrument).toBe('knife');
     })
  
+})
+
+// describe("Test /band endpoints", () => {
+//     test("test / endpoint", async () => {
+//         const response = await request(app).get("/band");
+//         const responseData =
+//     })
+// })
+
+describe("test validation methods", () => {
+    test("creating musician with a name sends a validation error", async () => {
+
+        const musicianData = {
+            name: "",
+            instrument: "shotgun"
+        };
+
+        const response = await request(app).post("/musician").send(musicianData);
+
+        expect(response.body.error[0].path).toBe("name");
+    })
+    test("creating musician with an instrument sends a validation error", async () => {
+
+        const musicianData = {
+            name: "hakia",
+            instrument: ""
+        };
+
+        const response = await request(app).post("/musician").send(musicianData);
+
+        expect(response.body.error[0].path).toBe("instrument");
+    })
 })

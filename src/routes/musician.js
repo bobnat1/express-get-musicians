@@ -1,6 +1,8 @@
 const { Router } = require("express");
 const musicianRouter = Router();
 const { Musician } = require("../../models/index.js");
+const { check, validationResult } = require("express-validator");
+
 
 //TODO: Create a GET /musicians route to return all musicians 
 musicianRouter.get("/", async (req, res) => {
@@ -18,12 +20,29 @@ musicianRouter.get("/:id", async (req, res) => {
     res.json(musician);
 })
 
-musicianRouter.post("/", async (req, res) => {
-    const newMusican = await Musician.create(req.body);
-    if (!newMusican)
-        throw new Error("No user created");
-    res.send(newMusican.name)
-}) 
+musicianRouter.post(
+    "/", 
+    check("name").not().isEmpty().trim(),
+    check("instrument").not().isEmpty().trim(),
+    async (req, res, next) => {
+
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty())
+                res.json({error: errors.array()});
+            else {
+                const newMusican = await Musician.create(req.body);
+                if (!newMusican)
+                    throw new Error("No user created");
+
+                res.send(newMusican.name)
+            }
+            
+        } catch(error) {
+
+            next(error)
+        }
+    }) 
 
 musicianRouter.put("/:id", async (req, res) => {
     const musician = await Musician.findByPk(req.params.id);
